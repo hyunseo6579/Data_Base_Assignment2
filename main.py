@@ -27,8 +27,42 @@ while program_active:
     if not logged_in:
         print("Error: Unsuccessful login.")
         continue
-    # or else do the normal stuff you'd do here.
+    while logged_in:
+        # have all the options when logged in successfully, then ask user which they wish to do
+        print("Enter one of the following numbers in order to complete an action")
+        print("1: List products")
+        print("2: Search for sales")
+        print("3: Post a sale")
+        print("4: Search for users")
+        print("5: Logout")
+        print("6: Exit")
+        user_choice = input()
+        if user_choice == '1':
+            pass
+            #do 1
+        elif user_choice == '2':
+            pass
+            #do 2
+        elif user_choice == '3':
+            pass
+            #do 3
+        elif user_choice == '4':
+            pass
+            #do 4
+        elif user_choice == '5':
+            # code to logout of current user
+            print("Logging out.")
+            logged_in = False
+        elif user_choice == '6':
+            # code to log out & then exit out of the program
+            print("Exiting.")
+            logged_in = False
+            program_active = False
+        else:
+            # if this is reached, it means the user didn't input a valid response.
+            print("Please enter a valid choice.")
 
 # commit for the final time and then close the connection & finish the program
 conn.commit()
 conn.close()
+exit()
