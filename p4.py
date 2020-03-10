@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime, date
+import datetime
 # commit outside of this file
 # postSale(cursor,listerEmail) to run
 
@@ -8,24 +8,24 @@ def getDate(): #HELPER edate
     check = False
     # error checks to makes sure user enters the correct input
     while check == False:
-        timeNow = datetime.now(tz=None)
+        timeNow = datetime.datetime.today()
+        month = timeNow.month
+        day = timeNow.day
+        if month < 10:
+            month = '0' + str(month)
+        if day < 10:
+            day = '0' + str(day)
+        currentDate = str(timeNow.year) + '-' + str(month) + '-' + str(day)
         try:
-            complete = input('end date-time (YYYY-MM-DD-HH-MM): ')
-            complete_date = complete.split('-')
+            complete = input('end date-time (YYYY-MM-DD): ')
 
-            given = datetime(
-                int(complete_date[0]),
-                int(complete_date[1]), 
-                int(complete_date[2]),
-                int(complete_date[3]), 
-                int(complete_date[4]) )
-            assert(given>timeNow)
+            assert(complete > currentDate)
             check = True
 
         except:
             print('the provided datetime is invalid')
             check = False
-    return given
+    return complete
 
 def pidTaken(pid, c): #HELPER pid
     taken = False
@@ -60,9 +60,9 @@ def postSale(c, lister):
     alphabet = ['a','b','c','d','e','f','g','h','i','j',
                'k','l','m','n','o','p','q','r','s','t',
                'u','v','w','x','y','z']
-    pid = input("Enter product ID (or leave balnk): ")
-    while pid != "" and (len(pid) > 4 or pid[0].lower() not in alphabet or pidTaken(pid.upper(),c) == True):
-        print("Invalid input or pid already taken")
+    pid = input("Enter product ID (or leave blank): ")
+    while pid != "" and (len(pid) > 4 or pid[0].lower() not in alphabet or pidTaken(pid.upper(),c) == False):
+        print("Invalid input")
         pid = input("Enter product ID (or leave blank): ")
     if pid == "":
         pid = None
@@ -103,9 +103,8 @@ def postSale(c, lister):
         if sid not in sidExist:
             break
 
-
+    values = (sid, lister, pid, edate, descr, condition, rPrice)
     # insert data into table
 
-    c.executescript("INSERT INTO sales(sid, lister, pid, edate, descr, cond, rprice) values (?, ?, ?, ?, ?)",
-     (sid, lister, pid, edate, descr, condition, rPrice))
+    c.execute("INSERT INTO sales(sid, lister, pid, edate, descr, cond, rprice) values (?, ?, ?, ?, ?, ?, ?)", values)
     return None
