@@ -1,5 +1,6 @@
+
 import sqlite3
-from datetime import date
+from datetime import datetime
 import random
 import math
 import p3
@@ -14,7 +15,7 @@ def p1(cursor, connect, user_email):
         WHERE p.pid = s.pid
         AND s.edate > date('now')
         GROUP BY p.pid, p.descr
-        ORDER BY COUNT(s.sid) DESC
+        ORDER BY COUNT(s.sid) DESC ;
     ''')
     rows = cursor.fetchall()
     print("%s|%-20s|%s|%s|%s" % ('PID','Description','No. of Reviews','Avg Rating', 'No. Active Sales'))
@@ -43,7 +44,7 @@ def p1(cursor, connect, user_email):
     elif inpt == '2':
         view_reviews(cursor, pid)
     elif inpt == '3':
-        view_sales(cursor, connect, pid)
+        view_sales(cursor, connect, pid, user_email)
     else:
         print("Entered number is invalid.")
 
@@ -75,17 +76,20 @@ def write_review(cursor, pid, connect, email):
 
     cursor.execute("SELECT rid FROM previews")
     rids = cursor.fetchall()
+    check = False
     while check == False:
         rid = random.randint(1,9999)
+        x = 'NIL'
         for each_rid in rids:
-            if str(rid) != each_rid[0]:
-                check = True
+            if str(rid) == each_rid[0]:
+                x = each_rid[0]
                 break
-            else:
-                check = False
+
+        if x != 'NIL':
+            continue
 
     # does this need to include time as well? check data when posted
-    rdate = date.today()
+    rdate = datetime.now()
 
     cursor.execute('INSERT INTO previews VALUES(:rid, :pid, :reviewer, :rating, :rtext, :rdate) ;',
                    {'rid':rid, 'pid':pid, 'reviewer':email, 'rating':rating, 'rtext':rtext, 'rdate':rdate})
@@ -95,7 +99,7 @@ def write_review(cursor, pid, connect, email):
 
 def view_reviews(cursor, pid):
 
-    cursor.execute("SELECT * FROM previews WHERE pid = :pid", {'pid':pid})
+    cursor.execute("SELECT * FROM previews WHERE pid = :pid ;", {'pid':pid})
     reviews = cursor.fetchall()
     print('%s' % 'Product Reviews:')
     for each_review in reviews:
@@ -103,14 +107,14 @@ def view_reviews(cursor, pid):
 
     return
 
-def view_sales(cursor, connect, pid):
+def view_sales(cursor, connect, pid, email):
 
     cursor.execute('''SELECT s.sid, s.descr, IFNULL(MAX(bids.amount), s.rprice), (julianday(s.edate)- julianday('now'))
                     FROM sales s LEFT OUTER JOIN bids ON s.sid = bids.sid
                     WHERE s.pid = :pid 
                     AND s.edate > date('now')
                     GROUP BY s.sid, s.descr
-                    ORDER BY edate ASC''', {'pid':pid})
+                    ORDER BY edate ASC ;''', {'pid':pid})
     sales = cursor.fetchall()
     print("Active Sales For The Product:")
     print("%-4s|%-25s|%-10s|%s" % ('SID', 'Sale Description', 'Max Bid/RP', 'Time Left Until Sale Ends'))
@@ -141,6 +145,4 @@ def view_sales(cursor, connect, pid):
             print("Entered SID is invalid.")
 
     # prompt p3 options here
-    p3.p3forp1(cursor, connect, sales[index], time[index])
-
-    return
+    p3.p3(cursor, connect, sales[index], time[index], email)
