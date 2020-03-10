@@ -1,3 +1,4 @@
+
 import sqlite3
 from datetime import datetime
 import random
@@ -145,5 +146,3 @@ def view_sales(cursor, connect, pid, email):
 
     # prompt p3 options here
     p3.p3(cursor, connect, sales[index], time[index], email)
-
-    return
