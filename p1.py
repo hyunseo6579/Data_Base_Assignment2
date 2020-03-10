@@ -2,6 +2,8 @@ import sqlite3
 from datetime import date
 import random
 import math
+import p3
+
 
 def p1(cursor, connect, user_email):
 
@@ -35,14 +37,13 @@ def p1(cursor, connect, user_email):
           "2. List all reviews of the product\n"
           "3. List all active sales of product")
     inpt = input("Enter the task number to perform: ")
-    inpt = int(inpt)
 
-    if inpt == 1:
+    if inpt == '1':
         write_review(cursor, pid, connect, user_email)
-    elif inpt == 2:
+    elif inpt == '2':
         view_reviews(cursor, pid)
-    elif inpt == 3:
-        view_sales(cursor, pid)
+    elif inpt == '3':
+        view_sales(cursor, connect, pid)
     else:
         print("Entered number is invalid.")
 
@@ -102,27 +103,44 @@ def view_reviews(cursor, pid):
 
     return
 
-def view_sales(cursor, pid):
+def view_sales(cursor, connect, pid):
 
-    cursor.execute('''SELECT s.descr, IFNULL(MAX(bids.amount), s.rprice), (julianday(s.edate)- julianday('now'))
+    cursor.execute('''SELECT s.sid, s.descr, IFNULL(MAX(bids.amount), s.rprice), (julianday(s.edate)- julianday('now'))
                     FROM sales s LEFT OUTER JOIN bids ON s.sid = bids.sid
                     WHERE s.pid = :pid 
                     AND s.edate > date('now')
                     GROUP BY s.sid, s.descr
                     ORDER BY edate ASC''', {'pid':pid})
     sales = cursor.fetchall()
-    print("Active Sales For The Product (sale description, max bid/reserved price, time until sale ends):")
+    print("Active Sales For The Product:")
+    print("%-4s|%-25s|%-10s|%s" % ('SID', 'Sale Description', 'Max Bid/RP', 'Time Left Until Sale Ends'))
     time = []
     for each_sale in sales:
-        day = math.floor(each_sale[2])
-        hour = math.floor((each_sale[2]-day)*24)
-        minute = round(((each_sale[2]-day)*24-hour)*60)
+        day = math.floor(each_sale[3])
+        hour = math.floor((each_sale[3]-day)*24)
+        minute = round(((each_sale[3]-day)*24-hour)*60)
         time.append(str(day)+' day(s) '+str(hour)+' hour(s) '+str(minute)+' minute(s)')
     index = 0
     for each_sale in sales:
-        print("%-25s|%-10d|%s" % (each_sale[0], each_sale[1], time[index]))
+        print("%-4s|%-25s|%-10d|%s" % (each_sale[0], each_sale[1], each_sale[2], time[index]))
         index += 1
 
-    # prompt q3 options here
+    check = False
+    index = -1
+    while check == False:
+        sid = input("Select a product by entering its SID: ")
+        for each_sale in sales:
+            index += 1
+            if sid.lower() == each_sale[0].lower():
+                sid = each_sale[0].lower()
+                check = True
+                break
+
+        if check == False:
+            index = -1
+            print("Entered SID is invalid.")
+
+    # prompt p3 options here
+    p3.p3forp1(cursor, connect, sales[index], time[index])
 
     return
