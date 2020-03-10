@@ -87,6 +87,8 @@ def write_review(cursor, pid, connect, email):
 
         if x != 'NIL':
             continue
+        else:
+            check = True
 
     # does this need to include time as well? check data when posted
     rdate = datetime.now()
@@ -132,7 +134,8 @@ def view_sales(cursor, connect, pid, email):
     check = False
     index = -1
     while check == False:
-        sid = input("Select a product by entering its SID: ")
+        sid = input("Select a sale by entering its SID: ")
+
         for each_sale in sales:
             index += 1
             if sid.lower() == each_sale[0].lower():

@@ -3,6 +3,10 @@ from os import path
 import sys
 import getpass
 from login import *
+from p5 import *
+from p2 import *
+from p4 import *
+from p1 import *
 
 # With db argument passed in, checks if it's a valid file. If valid connect and make cursor, if not print error and exit
 db_name = sys.argv[1]
@@ -12,7 +16,6 @@ if path.exists(db_name):
 else:
     print("Error: Database not found.")
     exit()
-
 #this is the main program loop, which will contain a logged in loop to make sure the user successfully logs in.
 program_active = True
 while program_active:
@@ -38,17 +41,38 @@ while program_active:
         print("6: Exit")
         user_choice = input()
         if user_choice == '1':
-            pass
-            #do 1
+            p1(c, conn, user_email)
         elif user_choice == '2':
-            pass
-            #do 2
+            searchForSales(c, conn, user_email)
         elif user_choice == '3':
-            pass
-            #do 3
+            postSale(c, user_email)
+            conn.commit()
         elif user_choice == '4':
-            pass
-            #do 4
+            # search up all the users, list them out and then ask what individual the user wishes to select.
+            users_list = searchUsers(c)
+            count_of_users = len(users_list)
+            print("Please use the integer in front of the user to select that individual.")
+            for i in range(count_of_users):
+                print('%d) %s, %s, %s' % (i, users_list[i][0], users_list[i][1], users_list[i][3]))
+            # now select an action and perform the action with the selected user.
+            selected_user = int(input("Please enter the integer of the individual you wish to select: "))
+            print("Please select a following action")
+            print("1: Write a review of the user")
+            print("2: List all active listings of the user")
+            print("3: List all reviews of the user")
+            selected_action = input()
+            if selected_action == '1':
+                writeReviewOfUser(c, users_list[selected_user], user_email)
+            elif selected_action == '2':
+                c.execute('''SELECT * FROM sales s1 WHERE s1.lister = :selecteduser;''', {"selecteduser":users_list[selected_user][0]})
+                temp_rows = c.fetchall()
+                if len(temp_rows) == 0:
+                    print("This user does not have any active sales.")
+                else:
+                    list_sales(c, users_list[selected_user][0], conn, user_email)
+            elif selected_action == '3':
+                list_rvs(c, users_list[selected_user][0])
+            conn.commit()
         elif user_choice == '5':
             # code to logout of current user
             print("Logging out.")
