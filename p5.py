@@ -23,6 +23,11 @@ def writeReviewOfUser(c, userInfo, email):
     review_date = str(d.year) + '-' + str(month) + '-' + str(day)
     reviewer = email
     reviewee = userInfo[0]
+    c.execute('''SELECT r1.reviewer, r1.reviewee FROM reviews r1 WHERE r1.reviewer = :reviewer AND r1.reviewee = :reviewee ;''', {"reviewer":reviewer, "reviewee":reviewee})
+    rows = c.fetchall()
+    if len(rows) != 0:
+        print("You cannot make this review, you have already reviewed this person.")
+        return
     c.execute('INSERT INTO reviews VALUES(:reviewer, :reviewee, :rating, :rtext, :rdate) ;', {"reviewer":reviewer, "reviewee":reviewee, "rating":review_rating, "rtext":review_text, "rdate":review_date})
     return
 
