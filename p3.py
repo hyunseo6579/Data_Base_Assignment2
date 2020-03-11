@@ -115,7 +115,7 @@ def list_sales(cursor, seller, connection, email):
     check = False
     index = -1
     while check == False:
-        sid = input("Select a product by entering its SID: ")
+        sid = input("Select a sale by entering its SID: ")
         for each_sale in sales:
             index += 1
             if sid.lower() == each_sale[0].lower():
